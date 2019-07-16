@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/item1"
+        android:title="prestamos"
+        android:icon="@drawable/ic_home"
+        app:showAsAction="ifRoom" />
+    <item
+        android:id="@+id/item2"
+        android:title="Medidor"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/item3"
+        android:title="Consumo"
+        app:showAsAction="never" />
+    <item
+        android:title="Ajustes"
+        app:showAsAction="never" >
+        <menu>
+            <item
+                android:id="@+id/itemsub1"
+                android:title="Tarifa"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/itemsub2"
+                android:title="Datos personales"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/itemsub3"
+                android:title="Limite de consumo"
+                app:showAsAction="never" />
+
+        </menu>
+    </item>
+    <item
+        android:id="@+id/item"
+        android:title="Cerrar Sesión"
+        app:showAsAction="never" />
+
+</menu>
