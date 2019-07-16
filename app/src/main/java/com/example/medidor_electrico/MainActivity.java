@@ -84,7 +84,6 @@ public class MainActivity extends AppCompatActivity {
             archivo.close();
         } catch (IOException e) {
         }
-        finish();
     }
 
     public void Clickbtn(View view) {
@@ -102,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
             //Quitar eso arriba para verificar
             var_user = valor_uno;
             var_pass = valor_dos;
-            ejecutarServices("http://192.168.43.153/arduino/ingresar.php");
+            ejecutarServices("http://www.orthodentalnic.com/arduino/ingresar.php");
         }
     }
 
@@ -115,7 +114,6 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     grabar(response);
                     Intent intent = new Intent(MainActivity.this, intronext.class);
-                    finish();
                     startActivity(intent);
                 }
             }
@@ -123,6 +121,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(getApplicationContext(), "Error Conexion", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(MainActivity.this, intronext.class);
+                startActivity(intent);
             }
         }) {
             @Override

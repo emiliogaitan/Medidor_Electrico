@@ -1,18 +1,11 @@
 package com.example.medidor_electrico;
 
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.nfc.Tag;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.Layout;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -24,11 +17,17 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.medidor_electrico.app_txt_BD.dialog_vista;
-import com.example.medidor_electrico.app_txt_BD.dilog_vista_limite;
 import com.github.mikephil.charting.charts.BarChart;
+import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.github.mikephil.charting.components.AxisBase;
+import com.github.mikephil.charting.components.Description;
+import com.github.mikephil.charting.components.XAxis;
+import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
+import com.github.mikephil.charting.formatter.IAxisValueFormatter;
+import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
 import java.io.BufferedReader;
@@ -46,7 +45,8 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
     TextView fecha;
     String fecha_valor;
     String indmedidor;
-    String tarifas="";
+    String tarifas = "";
+
     private BarChart mBarChart;
 
     @Override
@@ -55,18 +55,44 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         setContentView(R.layout.activity_consumo);
         setFechaActual();
         // server acceso
-        ejecutarServices("http://192.168.43.153/arduino/potencia.php");
-
-        mBarChart = findViewById(R.id.grafica1);
-        mBarChart.getDescription().setEnabled(false);
-        setData(10);
-        mBarChart.setFitBars(true);
+        ejecutarServices("http://www.orthodentalnic.com/arduino/potencia.php");
 
         tarifas = tarifa_datos();
         if (tarifas.equals("")) {
             dialog_vista dialog_vista = new dialog_vista();
             dialog_vista.show(getSupportFragmentManager(), "ejemplo1");
         }
+        HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.grafica1);
+        BarDataSet set1;
+        set1 = new BarDataSet(getDataSet(), "Año 2019");
+
+        set1.setColors(ColorTemplate.MATERIAL_COLORS);
+
+        ArrayList<IBarDataSet> dataSets = new ArrayList<IBarDataSet>();
+        dataSets.add(set1);
+
+        BarData data = new BarData(dataSets);
+
+        // hide Y-axis
+        YAxis left = chart.getAxisLeft();
+        left.setDrawLabels(false);
+
+        // custom X-axis labels
+        String[] values = new String[]{"Marzo", "Mayo", "Junio", "Julio", "Agosto", "Septiembre"};
+        XAxis xAxis = chart.getXAxis();
+        xAxis.setValueFormatter(new Inicio.MyXAxisValueFormatter(values));
+
+        chart.setData(data);
+
+        // custom description
+        Description description = new Description();
+        description.setText("Consumo total Kwh mensula");
+        chart.setDescription(description);
+
+        // hide legend
+        chart.getLegend().setEnabled(false);
+        chart.animateY(1000);
+        chart.invalidate();
     }
 
     public String tarifa_datos() {
@@ -107,25 +133,6 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         fecha_valor = ss;
     }
 
-    private void setData(int count) {
-        ArrayList<BarEntry> yVals = new ArrayList<>();
-
-        yVals.add(new BarEntry(1, (int) 100));
-        yVals.add(new BarEntry(2, (int) 200));
-        yVals.add(new BarEntry(3, (int) 300));
-        yVals.add(new BarEntry(4, (int) 400));
-        yVals.add(new BarEntry(5, (int) 500));
-
-        BarDataSet set = new BarDataSet(yVals, "Consumo Mensual");
-        set.setColors(ColorTemplate.MATERIAL_COLORS);
-        set.setDrawValues(true);
-
-        BarData data = new BarData(set);
-        mBarChart.setData(data);
-        mBarChart.invalidate();
-        mBarChart.animateY(500);
-    }
-
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
@@ -136,22 +143,18 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.item3:
-                Intent intent3 = new Intent(consumo.this, Inicio.class);
-                startActivity(intent3);
-                return true;
             case R.id.itemsub1:
                 dialog_vista dialog_vista = new dialog_vista();
                 dialog_vista.show(getSupportFragmentManager(), "ejemplo1");
                 return true;
             case R.id.itemsub2:
                 Intent intent4 = new Intent(consumo.this, configure_user_datos.class);
-                intent4.putExtra("medidor",indmedidor);
+                intent4.putExtra("medidor", indmedidor);
                 startActivity(intent4);
                 return true;
-            case R.id.itemsub3:
-                dilog_vista_limite dilog_vista_limite = new dilog_vista_limite();
-                dilog_vista_limite.show(getSupportFragmentManager(), "ejemplo2");
+            case R.id.itemsub4:
+                Intent intent5 = new Intent(consumo.this,Inicio.class);
+                startActivity(intent5);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -162,8 +165,6 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
     @Override
     public void applyTexts(String tarifa) {
         grabar_tarifa(tarifa);
-        Intent intent3 = new Intent(consumo.this, consumo.class);
-        startActivity(intent3);
     }
 
     private void ejecutarServices(String url) {
@@ -242,6 +243,33 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
             archivo.close();
         } catch (IOException e) {
         }
-        finish();
+    }
+
+    public class MyXAxisValueFormatter implements IAxisValueFormatter {
+
+        private String[] mValues;
+
+        public MyXAxisValueFormatter(String[] values) {
+            this.mValues = values;
+        }
+
+        @Override
+        public String getFormattedValue(float value, AxisBase axis) {
+            return mValues[(int) value];
+        }
+    }
+    private ArrayList<BarEntry> getDataSet() {
+        ArrayList<BarEntry> valueSet1 = new ArrayList<>();
+        BarEntry v1e2 = new BarEntry(1, 95f);
+        valueSet1.add(v1e2);
+        BarEntry v1e3 = new BarEntry(2, 98f);
+        valueSet1.add(v1e3);
+        BarEntry v1e4 = new BarEntry(3, 100f);
+        valueSet1.add(v1e4);
+        BarEntry v1e5 = new BarEntry(4, 95f);
+        valueSet1.add(v1e5);
+        BarEntry v1e6 = new BarEntry(5, 0f);
+        valueSet1.add(v1e6);
+        return valueSet1;
     }
 }
