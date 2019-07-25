@@ -62,7 +62,7 @@ public class configure_user_datos extends AppCompatActivity {
         }else{
             medidor=(String)savedInstanceState.getSerializable("medidor");
         }
-        datos_totales("http://192.168.43.153/arduino/todo_generales.php");
+        datos_totales("http://www.orthodentalnic.com/arduino/todo_generales.php");
     }
 
     @Override
@@ -108,7 +108,7 @@ public class configure_user_datos extends AppCompatActivity {
         if (valor1.equals(" ") && valor2.equals(" ") && valor3.equals(" ") && valor4.equals(" ")) {
             Toast.makeText(getApplicationContext(), "Revisar datos Formulario", Toast.LENGTH_SHORT).show();
         } else {
-            ejecutarServices("http://192.168.43.153/arduino/actualizardatos.php");
+            ejecutarServices("http://www.orthodentalnic.com/arduino/actualizardatos.php");
             Toast.makeText(getApplicationContext(), "Datos Guardados Exito", Toast.LENGTH_SHORT).show();
         }
 

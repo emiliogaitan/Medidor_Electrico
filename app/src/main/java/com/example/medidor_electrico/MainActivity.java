@@ -100,7 +100,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             var_user = valor_uno;
             var_pass = valor_dos;
-            ejecutarServices("http://192.168.43.153/arduino/ingresar.php");
+            ejecutarServices("http://www.orthodentalnic.com/arduino/ingresar.php");
         }
     }
 

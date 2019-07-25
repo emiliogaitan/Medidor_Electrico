@@ -49,7 +49,7 @@ public class dialog_vista extends AppCompatDialogFragment {
                         listener.applyTexts(tarifastotal);
                     }
                 });
-        datos_tarifa("http://192.168.43.153/arduino/limte_mostar.php");
+        datos_tarifa("http://www.orthodentalnic.com/arduino/limte_mostar.php");
         tarifa = view.findViewById(R.id.texttarifa);
 
         return builder.create();

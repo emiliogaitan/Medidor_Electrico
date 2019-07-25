@@ -61,7 +61,7 @@ public class grafica_consumo extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inicio);
 
-        datos_totales("http://192.168.43.153/arduino/limte_mostar.php");
+        datos_totales("http://www.orthodentalnic.com/arduino/limte_mostar.php");
 
         mostrarPorcentaje = (TextView) findViewById(R.id.txtCargar);
         // SeekBar
@@ -78,7 +78,7 @@ public class grafica_consumo extends AppCompatActivity {
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         mostrarPorcentaje.setText(String.valueOf(progress) + " Cordobas");
                         limite=progress;
-                        ejecutarServices("http://192.168.43.153/arduino/limite_insertar.php");
+                        ejecutarServices("http://www.orthodentalnic.com/arduino/limite_insertar.php");
                     }
 
                     //hace un llamado  cuando se toca la perilla

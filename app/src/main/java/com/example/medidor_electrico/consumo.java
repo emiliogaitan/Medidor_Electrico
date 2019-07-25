@@ -66,8 +66,8 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
 
 
         // server acceso
-        ejecutarServices("http://192.168.43.153/arduino/potencia.php");
-        datos_tarifa("http://192.168.43.153/arduino/limte_mostar.php");
+        ejecutarServices("http://www.orthodentalnic.com/arduino/potencia.php");
+        datos_tarifa("http://www.orthodentalnic.com/arduino/limte_mostar.php");
 
         HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.grafica1);
         BarDataSet set1;
@@ -177,7 +177,7 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
 
     @Override
     public void applyTexts(String tarifa) {
-        guardar_tarifa("http://192.168.43.153/arduino/tarifa_insertar.php");
+        guardar_tarifa("http://www.orthodentalnic.com/arduino/tarifa_insertar.php");
         tarifas = Double.parseDouble(tarifa);
         Intent intent5 = new Intent(consumo.this, consumo.class);
         startActivity(intent5);
