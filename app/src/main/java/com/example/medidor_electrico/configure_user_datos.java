@@ -35,17 +35,23 @@ public class configure_user_datos extends AppCompatActivity {
 
     public EditText nombre;
     public String valor1 = "";
-    public EditText nmedidor;
-    public String valor2 = "";
     public EditText telefono;
+    public String valor2 = "";
+    public EditText departamento;
     public String valor3 = "";
     public EditText direccion;
     public String valor4 = "";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_configure_user_datos);
+        nombre = findViewById(R.id.Editext202);
+        telefono = findViewById(R.id.Editext203);
+        departamento= findViewById(R.id.Editext204);
+        direccion = findViewById(R.id.Editext205);
+
         if(savedInstanceState==null){
             Bundle extras=getIntent().getExtras();
             if(extras==null){
@@ -56,7 +62,7 @@ public class configure_user_datos extends AppCompatActivity {
         }else{
             medidor=(String)savedInstanceState.getSerializable("medidor");
         }
-        datos_totales("http://orthodentalni.com/arduino/todo_generales.php");
+        datos_totales("http://192.168.43.153/arduino/todo_generales.php");
     }
 
     @Override
@@ -79,33 +85,31 @@ public class configure_user_datos extends AppCompatActivity {
     }
 
     public void enviardatos(View view) {
-        nombre = findViewById(R.id.Editext202);
         valor1 = nombre.getText().toString();
-        nmedidor = findViewById(R.id.Editext203);
-        valor2 = nmedidor.getText().toString();
-        telefono = findViewById(R.id.Editext204);
-        valor3 = telefono.getText().toString();
-        direccion = findViewById(R.id.Editext205);
+        valor2 = telefono.getText().toString();
+        valor3 = departamento.getText().toString();
         valor4 = direccion.getText().toString();
+
         if (valor1.equals("")) {
             nombre.setError("Ingresar Nombre");
         }
 
         if (valor2.equals("")) {
-            nmedidor.setError("Ingresar No medidor");
-        }
-        if (valor3.equals("")) {
             telefono.setError("Ingresar Telefono");
         }
+        if (valor3.equals("")) {
+            departamento.setError("Ingresar Departemento");
+        }
+
         if (valor4.equals("")) {
             direccion.setError("Ingresar Direccion");
         }
 
-        if (valor1.equals("") && valor2.equals("") && valor3.equals("") && valor4.equals("")) {
+        if (valor1.equals(" ") && valor2.equals(" ") && valor3.equals(" ") && valor4.equals(" ")) {
             Toast.makeText(getApplicationContext(), "Revisar datos Formulario", Toast.LENGTH_SHORT).show();
         } else {
-            ejecutarServices("http://www.orthodentalnic.com/arduino/actualizardatos.php");
-            Toast.makeText(getApplicationContext(), "Datos Enviados", Toast.LENGTH_SHORT).show();
+            ejecutarServices("http://192.168.43.153/arduino/actualizardatos.php");
+            Toast.makeText(getApplicationContext(), "Datos Guardados Exito", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -126,8 +130,8 @@ public class configure_user_datos extends AppCompatActivity {
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parametross = new HashMap<String, String>();
                 parametross.put("nombre", valor1);
-                parametross.put("medidor", medidor);
-                parametross.put("telefono", valor3);
+                parametross.put("telefono", valor2);
+                parametross.put("departamento", valor3);
                 parametross.put("direccion", valor4);
                 return parametross;
             }
@@ -146,12 +150,12 @@ public class configure_user_datos extends AppCompatActivity {
                         jsonObject = response.getJSONObject(i);
                         nombre.setText(jsonObject.getString("nombre"));
                         telefono.setText(jsonObject.getString("telefono"));
+                        departamento.setText(jsonObject.getString("departamento"));
                         direccion.setText(jsonObject.getString("direccion"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
                 }
-                Toast.makeText(getApplicationContext(), "valo"+jsonObject, Toast.LENGTH_SHORT).show();
             }
         }, new Response.ErrorListener() {
             @Override
@@ -162,4 +166,5 @@ public class configure_user_datos extends AppCompatActivity {
         requestQueue =Volley.newRequestQueue(this);
         requestQueue.add(jsonArrayRequest);
     }
+
 }

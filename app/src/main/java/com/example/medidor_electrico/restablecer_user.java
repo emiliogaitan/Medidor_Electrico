@@ -49,7 +49,7 @@ public class restablecer_user extends AppCompatActivity {
         } else if (varString2.equals("")) {
             dos.setError("Ingresar Opcion");
         } else {
-            ejecutarServices("https://www.orthodentalnic.com/arduino/recuperarcuenta.php");
+            ejecutarServices("http://192.168.43.153/arduino/recuperarcuenta.php");
         }
 
     }
@@ -73,6 +73,8 @@ public class restablecer_user extends AppCompatActivity {
             @Override
             protected Map<String, String> getParams() throws AuthFailureError {
                 Map<String, String> parametross = new HashMap<String, String>();
+                uno = findViewById(R.id.editext111);
+                dos = findViewById(R.id.editext112);
                 parametross.put("indmedidor", uno.getText().toString());
                 parametross.put("user", dos.getText().toString());
                 return parametross;

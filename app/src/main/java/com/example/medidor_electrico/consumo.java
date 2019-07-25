@@ -1,6 +1,8 @@
 package com.example.medidor_electrico;
 
+import android.app.Notification;
 import android.content.Intent;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -14,6 +16,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.medidor_electrico.app_txt_BD.dialog_vista;
@@ -30,6 +33,10 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -45,7 +52,9 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
     TextView fecha;
     String fecha_valor;
     String indmedidor;
-    String tarifas = "";
+
+    public static double tarifas;
+    RequestQueue requestQueue;
 
     private BarChart mBarChart;
 
@@ -54,14 +63,12 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_consumo);
         setFechaActual();
-        // server acceso
-        ejecutarServices("http://www.orthodentalnic.com/arduino/potencia.php");
 
-        tarifas = tarifa_datos();
-        if (tarifas.equals("")) {
-            dialog_vista dialog_vista = new dialog_vista();
-            dialog_vista.show(getSupportFragmentManager(), "ejemplo1");
-        }
+
+        // server acceso
+        ejecutarServices("http://192.168.43.153/arduino/potencia.php");
+        datos_tarifa("http://192.168.43.153/arduino/limte_mostar.php");
+
         HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.grafica1);
         BarDataSet set1;
         set1 = new BarDataSet(getDataSet(), "Año 2019");
@@ -80,7 +87,7 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         // custom X-axis labels
         String[] values = new String[]{"Marzo", "Mayo", "Junio", "Julio", "Agosto", "Septiembre"};
         XAxis xAxis = chart.getXAxis();
-        xAxis.setValueFormatter(new Inicio.MyXAxisValueFormatter(values));
+        xAxis.setValueFormatter(new grafica_consumo.MyXAxisValueFormatter(values));
 
         chart.setData(data);
 
@@ -93,28 +100,6 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         chart.getLegend().setEnabled(false);
         chart.animateY(1000);
         chart.invalidate();
-    }
-
-    public String tarifa_datos() {
-        String todo = "";
-        String[] archivos = fileList();
-        if (existe(archivos, "tarifa.dll")) {
-            try {
-                InputStreamReader archivo = new InputStreamReader(
-                        openFileInput("tarifa.dll"));
-                BufferedReader br = new BufferedReader(archivo);
-                String linea = br.readLine();
-                while (linea != null) {
-                    todo = linea;
-                    linea = br.readLine();
-                }
-                br.close();
-                archivo.close();
-            } catch (IOException e) {
-
-            }
-        }
-        return todo;
     }
 
     public void setFechaActual() {
@@ -153,8 +138,14 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
                 startActivity(intent4);
                 return true;
             case R.id.itemsub4:
-                Intent intent5 = new Intent(consumo.this,Inicio.class);
+                Intent intent5 = new Intent(consumo.this, grafica_consumo.class);
                 startActivity(intent5);
+                return true;
+            case R.id.itemsub3:
+                Intent intent6 = new Intent(consumo.this, MainActivity.class);
+                startActivity(intent6);
+                cerra_app("");
+                cerra_app2("");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -162,9 +153,34 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
 
     }
 
+    public void cerra_app(String v) {
+        try {
+            OutputStreamWriter archivo = new OutputStreamWriter(openFileOutput(
+                    "datos.dll", MainActivity.MODE_PRIVATE));
+            archivo.write(v);
+            archivo.flush();
+            archivo.close();
+        } catch (IOException e) {
+        }
+    }
+
+    public void cerra_app2(String v) {
+        try {
+            OutputStreamWriter archivo = new OutputStreamWriter(openFileOutput(
+                    "mensaje.dll", MainActivity.MODE_PRIVATE));
+            archivo.write(v);
+            archivo.flush();
+            archivo.close();
+        } catch (IOException e) {
+        }
+    }
+
     @Override
     public void applyTexts(String tarifa) {
-        grabar_tarifa(tarifa);
+        guardar_tarifa("http://192.168.43.153/arduino/tarifa_insertar.php");
+        tarifas = Double.parseDouble(tarifa);
+        Intent intent5 = new Intent(consumo.this, consumo.class);
+        startActivity(intent5);
     }
 
     private void ejecutarServices(String url) {
@@ -176,8 +192,7 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
 
                 TextView total = findViewById(R.id.totalTEXT);
                 int val = Integer.parseInt(response);
-                int val2 = Integer.parseInt(tarifas);
-                float respuesta = (float) (val * val2);
+                float respuesta = (float) (val * tarifas);
                 total.setText(String.valueOf(respuesta) + " Cordobas");
             }
         }, new Response.ErrorListener() {
@@ -195,7 +210,7 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
                 return parametross;
             }
         };
-        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(stringRequest);
     }
 
@@ -234,16 +249,6 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         return false;
     }
 
-    public void grabar_tarifa(String v) {
-        try {
-            OutputStreamWriter archivo = new OutputStreamWriter(openFileOutput(
-                    "tarifa.dll", MainActivity.MODE_PRIVATE));
-            archivo.write(v);
-            archivo.flush();
-            archivo.close();
-        } catch (IOException e) {
-        }
-    }
 
     public class MyXAxisValueFormatter implements IAxisValueFormatter {
 
@@ -258,6 +263,7 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
             return mValues[(int) value];
         }
     }
+
     private ArrayList<BarEntry> getDataSet() {
         ArrayList<BarEntry> valueSet1 = new ArrayList<>();
         BarEntry v1e2 = new BarEntry(1, 95f);
@@ -272,4 +278,54 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         valueSet1.add(v1e6);
         return valueSet1;
     }
+
+    private void datos_tarifa(String url) {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(url, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                JSONObject jsonObject = null;
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        jsonObject = response.getJSONObject(i);
+                        tarifas = Double.parseDouble(jsonObject.getString("tarifa"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
+        requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(jsonArrayRequest);
+    }
+
+    private void guardar_tarifa(String url) {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), "Error Conexion", Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parametross = new HashMap<String, String>();
+                indmedidor = indmedidor();
+                parametross.put("tarifa", String.valueOf(tarifas));
+                return parametross;
+            }
+        };
+        requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(stringRequest);
+    }
+
+
 }

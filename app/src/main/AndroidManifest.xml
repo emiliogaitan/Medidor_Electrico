@@ -19,7 +19,7 @@
         <activity android:name=".intronext" />
         <activity android:name=".restablecer_user" />
         <activity android:name=".ahorro_electrico" />
-        <activity android:name=".Inicio" />
+        <activity android:name=".grafica_consumo" />
         <activity android:name=".configure_user_datos" />
         <activity android:name=".MainActivity">
             <intent-filter>

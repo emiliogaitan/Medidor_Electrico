@@ -98,10 +98,9 @@ public class MainActivity extends AppCompatActivity {
         } else if (valor_dos.equals("")) {
             pass.setError("Ingresar Contraseña");
         } else {
-            //Quitar eso arriba para verificar
             var_user = valor_uno;
             var_pass = valor_dos;
-            ejecutarServices("http://www.orthodentalnic.com/arduino/ingresar.php");
+            ejecutarServices("http://192.168.43.153/arduino/ingresar.php");
         }
     }
 

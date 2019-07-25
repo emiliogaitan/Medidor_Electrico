@@ -1,7 +1,11 @@
 package com.example.medidor_electrico;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
-import android.graphics.Color;
+import android.support.v4.app.NotificationCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -10,8 +14,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.example.medidor_electrico.app_txt_BD.dialog_vista;
+import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
@@ -24,47 +36,49 @@ import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 
-public class Inicio extends AppCompatActivity {
+public class grafica_consumo extends AppCompatActivity {
     private TextView mostrarPorcentaje;
     private SeekBar seekBar;
-    int limite;
-
+    private static int limite;
+    RequestQueue requestQueue;
+    NotificationCompat.Builder notificacion;
+    private static final int idUnica = 006;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inicio);
 
+        datos_totales("http://192.168.43.153/arduino/limte_mostar.php");
+
         mostrarPorcentaje = (TextView) findViewById(R.id.txtCargar);
-        limite=limites();
         // SeekBar
         seekBar = (SeekBar) findViewById(R.id.seekbar);
-        // Valor Inicial
         seekBar.setProgress(limite);
+        mostrarPorcentaje.setText(limite + " Cordobas");
         // Valot Final
         seekBar.setMax(1500);
+
         seekBar.setOnSeekBarChangeListener(
                 new SeekBar.OnSeekBarChangeListener() {
                     //hace un llamado a la perilla cuando se arrastra
                     @Override
-                    public void onProgressChanged(SeekBar seekBar,
-                                                  int progress, boolean fromUser) {
+                    public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         mostrarPorcentaje.setText(String.valueOf(progress) + " Cordobas");
-
-                        try {
-                            OutputStreamWriter archivo = new OutputStreamWriter(openFileOutput(
-                                    "limite.dll", MainActivity.MODE_PRIVATE));
-                            archivo.write(String.valueOf(progress));
-                            archivo.flush();
-                            archivo.close();
-                        } catch (IOException e) {
-                        }
+                        limite=progress;
+                        ejecutarServices("http://192.168.43.153/arduino/limite_insertar.php");
                     }
 
                     //hace un llamado  cuando se toca la perilla
@@ -107,8 +121,78 @@ public class Inicio extends AppCompatActivity {
         chart.getLegend().setEnabled(false);
         chart.animateY(1000);
         chart.invalidate();
+
+
+        // notificacon de mostracion de la imagenes de lsp datos
+        notificacion=new NotificationCompat.Builder(this);
+        notificacion.setAutoCancel(true);
+
+        if((limite*5)>900){
+            notificacion.setSmallIcon(R.mipmap.bombilla);
+            notificacion.setTicker("Limite de consumo");
+            notificacion.setPriority(Notification.PRIORITY_HIGH);
+            notificacion.setWhen(System.currentTimeMillis());
+            notificacion.setContentTitle("Ahorro");
+            notificacion.setContentText("Limite de consumo al Maximo");
+
+            Intent intent=new Intent(grafica_consumo.this,grafica_consumo.class);
+            PendingIntent pendingIntent=PendingIntent.getActivities(grafica_consumo.this,0, new Intent[]{intent},PendingIntent.FLAG_UPDATE_CURRENT);
+            notificacion.setContentIntent(pendingIntent);
+
+            NotificationManager nm=(NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+            nm.notify(idUnica,notificacion.build());
+        }
+
+
+    }
+    private void ejecutarServices(String url) {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), "Error Conexion", Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parametross = new HashMap<String, String>();
+                parametross.put("limite", String.valueOf(limite));
+                return parametross;
+            }
+        };
+        requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(stringRequest);
     }
 
+    private void datos_totales(String url) {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(url, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                JSONObject jsonObject = null;
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        jsonObject = response.getJSONObject(i);
+                        limite= Integer.parseInt((jsonObject.getString("limite")));
+                        mostrarPorcentaje.setText(limite + " Cordobas");
+                        seekBar.setProgress(limite);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(),"Error de conexión",Toast.LENGTH_SHORT).show();
+            }
+        });
+        requestQueue =Volley.newRequestQueue(this);
+        requestQueue.add(jsonArrayRequest);
+    }
     public void nn1(View view) {
 
         HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.grafica1);
@@ -143,34 +227,6 @@ public class Inicio extends AppCompatActivity {
         chart.animateY(1000);
         chart.invalidate();
 
-    }
-
-    public int limites() {
-        String todo = "";
-        String[] archivos = fileList();
-        if (existe(archivos, "limite.dll")) {
-            try {
-                InputStreamReader archivo = new InputStreamReader(
-                        openFileInput("limite.dll"));
-                BufferedReader br = new BufferedReader(archivo);
-                String linea = br.readLine();
-                while (linea != null) {
-                    todo = linea;
-                    linea = br.readLine();
-                }
-                br.close();
-                archivo.close();
-
-                if(todo.equals("")){
-                    limite=0;
-                }else{
-                    limite=Integer.parseInt(todo);
-                }
-            } catch (IOException e) {
-
-            }
-        }
-        return Integer.parseInt(todo);
     }
 
     public void nn2(View view) {
@@ -271,6 +327,7 @@ public class Inicio extends AppCompatActivity {
         valueSet1.add(v1e6);
         return valueSet1;
     }
+
     private ArrayList<BarEntry> getDataSetDias() {
         ArrayList<BarEntry> valueSet1 = new ArrayList<>();
         BarEntry v1e2 = new BarEntry(1, 3f);
@@ -285,6 +342,7 @@ public class Inicio extends AppCompatActivity {
         valueSet1.add(v1e6);
         return valueSet1;
     }
+
     private ArrayList<BarEntry> getDataSetSemana() {
         ArrayList<BarEntry> valueSet1 = new ArrayList<>();
         BarEntry v1e2 = new BarEntry(1, 23.75f);
@@ -311,19 +369,13 @@ public class Inicio extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.itemregresar:
-                Intent intent3 = new Intent(Inicio.this, consumo.class);
+                Intent intent3 = new Intent(grafica_consumo.this, consumo.class);
                 startActivity(intent3);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-    private boolean existe(String[] archivos, String archbusca) {
-        for (int f = 0; f < archivos.length; f++) {
-            if (archbusca.equals(archivos[f])) {
-                return true;
-            }
-        }
-        return false;
-    }
+
+
 }
