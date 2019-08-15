@@ -50,6 +50,7 @@ public class intronext extends AppCompatActivity {
                 } else {
                     Intent intent = new Intent(this, consumo.class);
                     startActivity(intent);
+                    finish();
                 }
             } catch (IOException e) {
 

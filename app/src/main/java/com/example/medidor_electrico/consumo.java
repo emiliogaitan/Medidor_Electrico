@@ -1,6 +1,8 @@
 package com.example.medidor_electrico;
 
 import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -52,6 +54,10 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
     TextView fecha;
     String fecha_valor;
     String indmedidor;
+    private static int potencia;
+    private static int limite;
+    NotificationCompat.Builder notificacion;
+    private static final int idUnica = 006;
 
     public static double tarifas;
     RequestQueue requestQueue;
@@ -64,10 +70,10 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         setContentView(R.layout.activity_consumo);
         setFechaActual();
 
-
         // server acceso
-        ejecutarServices("http://www.orthodentalnic.com/arduino/potencia.php");
-        datos_tarifa("http://www.orthodentalnic.com/arduino/limte_mostar.php");
+        datos_totales("https://www.orthodentalnic.com/arduino/limte_mostar.php");
+        ejecutarServices("https://www.orthodentalnic.com/arduino/potencia.php");
+        datos_tarifa("https://www.orthodentalnic.com/arduino/limte_mostar.php");
 
         HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.grafica1);
         BarDataSet set1;
@@ -100,6 +106,9 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         chart.getLegend().setEnabled(false);
         chart.animateY(1000);
         chart.invalidate();
+
+
+        notificacion();
     }
 
     public void setFechaActual() {
@@ -128,6 +137,11 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.refresh:
+                datos_totales("https://www.orthodentalnic.com/arduino/limte_mostar.php");
+                ejecutarServices("https://www.orthodentalnic.com/arduino/potencia.php");
+                datos_tarifa("https://www.orthodentalnic.com/arduino/limte_mostar.php");
+                return true;
             case R.id.itemsub1:
                 dialog_vista dialog_vista = new dialog_vista();
                 dialog_vista.show(getSupportFragmentManager(), "ejemplo1");
@@ -136,16 +150,24 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
                 Intent intent4 = new Intent(consumo.this, configure_user_datos.class);
                 intent4.putExtra("medidor", indmedidor);
                 startActivity(intent4);
+                finish();
                 return true;
             case R.id.itemsub4:
                 Intent intent5 = new Intent(consumo.this, grafica_consumo.class);
                 startActivity(intent5);
+                finish();
                 return true;
             case R.id.itemsub3:
                 Intent intent6 = new Intent(consumo.this, MainActivity.class);
                 startActivity(intent6);
                 cerra_app("");
                 cerra_app2("");
+                finish();
+                return true;
+            case R.id.itemsub6:
+                Intent intent7 = new Intent(consumo.this, categoria_electrodomestico.class);
+                startActivity(intent7);
+                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -177,7 +199,7 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
 
     @Override
     public void applyTexts(String tarifa) {
-        guardar_tarifa("http://www.orthodentalnic.com/arduino/tarifa_insertar.php");
+        guardar_tarifa("https://www.orthodentalnic.com/arduino/tarifa_insertar.php");
         tarifas = Double.parseDouble(tarifa);
         Intent intent5 = new Intent(consumo.this, consumo.class);
         startActivity(intent5);
@@ -192,7 +214,9 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
 
                 TextView total = findViewById(R.id.totalTEXT);
                 int val = Integer.parseInt(response);
+                potencia = val;
                 float respuesta = (float) (val * tarifas);
+                potencia = (int) respuesta;
                 total.setText(String.valueOf(respuesta) + " Cordobas");
             }
         }, new Response.ErrorListener() {
@@ -327,5 +351,50 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         requestQueue.add(stringRequest);
     }
 
+    public void notificacion() {
 
+        // notificacon de mostracion de la imagenes de lsp datos
+        notificacion = new NotificationCompat.Builder(this);
+        notificacion.setAutoCancel(true);
+
+        if ((potencia * 5) > limite) {
+            notificacion.setSmallIcon(R.mipmap.bombilla);
+            notificacion.setTicker("Limite de consumo");
+            notificacion.setPriority(Notification.PRIORITY_HIGH);
+            notificacion.setWhen(System.currentTimeMillis());
+            notificacion.setContentTitle("Ahorro");
+            notificacion.setContentText("Limite de consumo al Maximo");
+
+            Intent intent = new Intent(consumo.this, grafica_consumo.class);
+            PendingIntent pendingIntent = PendingIntent.getActivities(consumo.this, 0, new Intent[]{intent}, PendingIntent.FLAG_UPDATE_CURRENT);
+            notificacion.setContentIntent(pendingIntent);
+
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            nm.notify(idUnica, notificacion.build());
+        }
+    }
+
+    private void datos_totales(String url) {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(url, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                JSONObject jsonObject = null;
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        jsonObject = response.getJSONObject(i);
+                        limite = Integer.parseInt((jsonObject.getString("limite")));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+            }
+        });
+        requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(jsonArrayRequest);
+    }
 }

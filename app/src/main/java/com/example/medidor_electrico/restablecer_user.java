@@ -49,7 +49,7 @@ public class restablecer_user extends AppCompatActivity {
         } else if (varString2.equals("")) {
             dos.setError("Ingresar Opcion");
         } else {
-            ejecutarServices("http://www.orthodentalnic.com/arduino/recuperarcuenta.php");
+            ejecutarServices("https://www.orthodentalnic.com/arduino/recuperarcuenta.php");
         }
 
     }

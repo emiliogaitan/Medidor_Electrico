@@ -56,12 +56,16 @@ public class grafica_consumo extends AppCompatActivity {
     RequestQueue requestQueue;
     NotificationCompat.Builder notificacion;
     private static final int idUnica = 006;
+    private static int potencia = 0;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_inicio);
 
-        datos_totales("http://www.orthodentalnic.com/arduino/limte_mostar.php");
+        datos_totales("https://www.orthodentalnic.com/arduino/limte_mostar.php");
+        ejecutarServicespotemciz("https://www.orthodentalnic.com/arduino/potencia.php");
+        notificacion();
 
         mostrarPorcentaje = (TextView) findViewById(R.id.txtCargar);
         // SeekBar
@@ -77,8 +81,8 @@ public class grafica_consumo extends AppCompatActivity {
                     @Override
                     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                         mostrarPorcentaje.setText(String.valueOf(progress) + " Cordobas");
-                        limite=progress;
-                        ejecutarServices("http://www.orthodentalnic.com/arduino/limite_insertar.php");
+                        limite = progress;
+                        ejecutarServices("https://www.orthodentalnic.com/arduino/limite_insertar.php");
                     }
 
                     //hace un llamado  cuando se toca la perilla
@@ -122,29 +126,8 @@ public class grafica_consumo extends AppCompatActivity {
         chart.animateY(1000);
         chart.invalidate();
 
-
-        // notificacon de mostracion de la imagenes de lsp datos
-        notificacion=new NotificationCompat.Builder(this);
-        notificacion.setAutoCancel(true);
-
-        if((limite*5)>900){
-            notificacion.setSmallIcon(R.mipmap.bombilla);
-            notificacion.setTicker("Limite de consumo");
-            notificacion.setPriority(Notification.PRIORITY_HIGH);
-            notificacion.setWhen(System.currentTimeMillis());
-            notificacion.setContentTitle("Ahorro");
-            notificacion.setContentText("Limite de consumo al Maximo");
-
-            Intent intent=new Intent(grafica_consumo.this,grafica_consumo.class);
-            PendingIntent pendingIntent=PendingIntent.getActivities(grafica_consumo.this,0, new Intent[]{intent},PendingIntent.FLAG_UPDATE_CURRENT);
-            notificacion.setContentIntent(pendingIntent);
-
-            NotificationManager nm=(NotificationManager)getSystemService(NOTIFICATION_SERVICE);
-            nm.notify(idUnica,notificacion.build());
-        }
-
-
     }
+
     private void ejecutarServices(String url) {
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
             @Override
@@ -176,7 +159,7 @@ public class grafica_consumo extends AppCompatActivity {
                 for (int i = 0; i < response.length(); i++) {
                     try {
                         jsonObject = response.getJSONObject(i);
-                        limite= Integer.parseInt((jsonObject.getString("limite")));
+                        limite = Integer.parseInt((jsonObject.getString("limite")));
                         mostrarPorcentaje.setText(limite + " Cordobas");
                         seekBar.setProgress(limite);
                     } catch (JSONException e) {
@@ -187,12 +170,13 @@ public class grafica_consumo extends AppCompatActivity {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(),"Error de conexión",Toast.LENGTH_SHORT).show();
+                Toast.makeText(getApplicationContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
             }
         });
-        requestQueue =Volley.newRequestQueue(this);
+        requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(jsonArrayRequest);
     }
+
     public void nn1(View view) {
 
         HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.grafica1);
@@ -377,5 +361,51 @@ public class grafica_consumo extends AppCompatActivity {
         }
     }
 
+    public void notificacion() {
+
+        // notificacon de mostracion de la imagenes de lsp datos
+        notificacion = new NotificationCompat.Builder(this);
+        notificacion.setAutoCancel(true);
+
+        if ((potencia * 5) > limite) {
+            notificacion.setSmallIcon(R.mipmap.bombilla);
+            notificacion.setTicker("Limite de consumo");
+            notificacion.setPriority(Notification.PRIORITY_HIGH);
+            notificacion.setWhen(System.currentTimeMillis());
+            notificacion.setContentTitle("Ahorro");
+            notificacion.setContentText("Limite de consumo al Maximo");
+
+            Intent intent = new Intent(grafica_consumo.this, grafica_consumo.class);
+            PendingIntent pendingIntent = PendingIntent.getActivities(grafica_consumo.this, 0, new Intent[]{intent}, PendingIntent.FLAG_UPDATE_CURRENT);
+            notificacion.setContentIntent(pendingIntent);
+
+            NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            nm.notify(idUnica, notificacion.build());
+        }
+
+    }
+
+    private void ejecutarServicespotemciz(String url) {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                potencia = Integer.parseInt(response);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), "Error Conexion", Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parametross = new HashMap<String, String>();
+                parametross.put("date", "22");
+                return parametross;
+            }
+        };
+        requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(stringRequest);
+    }
 
 }

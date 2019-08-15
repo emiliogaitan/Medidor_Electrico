@@ -15,7 +15,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat">
-        <activity android:name=".consumo"></activity>
+        <activity android:name=".categoria_electrodomestico"></activity>
+        <activity android:name=".consumo" />
         <activity android:name=".intronext" />
         <activity android:name=".restablecer_user" />
         <activity android:name=".ahorro_electrico" />

@@ -108,7 +108,7 @@ public class configure_user_datos extends AppCompatActivity {
         if (valor1.equals(" ") && valor2.equals(" ") && valor3.equals(" ") && valor4.equals(" ")) {
             Toast.makeText(getApplicationContext(), "Revisar datos Formulario", Toast.LENGTH_SHORT).show();
         } else {
-            ejecutarServices("http://www.orthodentalnic.com/arduino/actualizardatos.php");
+            ejecutarServices("https://www.orthodentalnic.com/arduino/actualizardatos.php");
             Toast.makeText(getApplicationContext(), "Datos Guardados Exito", Toast.LENGTH_SHORT).show();
         }
 

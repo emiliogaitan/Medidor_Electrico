@@ -1,3 +1,8 @@
 <resources>
-    <string name="app_name">Medidor Electrico</string>
+    <string name="app_name">Tesla Electric</string>
+    <string-array name="sexo">
+        <item>Femenino</item>
+        <item>Masculino</item>
+        <item>Otro</item>
+    </string-array>
 </resources>

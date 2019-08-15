@@ -10,4 +10,5 @@ public class ahorro_electrico extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ahorro_electrico);
     }
+
 }
