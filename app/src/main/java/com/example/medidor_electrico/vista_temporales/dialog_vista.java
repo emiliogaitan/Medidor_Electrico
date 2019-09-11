@@ -1,4 +1,4 @@
-package com.example.medidor_electrico.app_txt_BD;
+package com.example.medidor_electrico.vista_temporales;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatDialogFragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -21,10 +20,6 @@ import com.example.medidor_electrico.R;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 
 public class dialog_vista extends AppCompatDialogFragment {
     private EditText tarifa;

@@ -61,6 +61,7 @@
         android:layout_marginRight="160dp"
         android:text="Total kWh /M"
         android:textColor="@color/black"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -110,7 +111,7 @@
         android:text="000 Cordobas"
         android:textAlignment="textEnd"
         android:textColor="@color/black"
-        android:textStyle="italic"
+        android:textStyle="bold"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toEndOf="@+id/textView21"
@@ -124,7 +125,7 @@
         android:layout_marginLeft="52dp"
         android:layout_marginTop="8dp"
         android:text="Total:"
-        android:textColor="@color/ic_launcher_background"
+        android:textColor="@color/azul"
         android:textStyle="bold"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView19" />
@@ -141,20 +142,6 @@
         app:layout_constraintStart_toEndOf="@+id/textView9"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <com.github.mikephil.charting.charts.HorizontalBarChart
-        android:id="@+id/grafica1"
-        android:layout_width="377dp"
-        android:layout_height="241dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView16">
-
-    </com.github.mikephil.charting.charts.HorizontalBarChart>
-
     <TextView
         android:id="@+id/textView16"
         android:layout_width="149dp"
@@ -164,8 +151,8 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:text="Grafica de consumo:"
-        android:textColor="@color/black"
+        android:text="consumo en Vivo:"
+        android:textColor="@color/azul"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -180,17 +167,31 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="24dp"
         android:layout_marginRight="24dp"
+        android:background="@color/black"
         android:text="0000000"
         android:textAlignment="viewEnd"
-        android:textAllCaps="true"
+        android:textAllCaps="false"
         android:textColor="@color/white"
         android:textSize="18sp"
         android:textStyle="bold"
         android:typeface="sans"
-        android:background="@color/black"
         app:fontFamily="monospace"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView9" />
 
+    <com.github.lzyzsd.circleprogress.ArcProgress
+        android:id="@+id/arc_progress"
+        android:layout_width="185dp"
+        android:layout_height="180dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:background="@color/white"
+        app:arc_bottom_text="Arduino Conectado"
+        app:arc_finished_color="@color/orange"
+        app:arc_stroke_width="15dp"
+        app:arc_progress="5"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView16" />
 </android.support.constraint.ConstraintLayout>

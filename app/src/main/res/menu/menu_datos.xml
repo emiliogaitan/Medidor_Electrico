@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/refresh"
+        android:title="regresar"
+        app:showAsAction="ifRoom"
+        android:icon="@drawable/ic_regresar"/>
+    <item
+        android:title="Ajustes"
+        app:showAsAction="ifRoom"
+        android:icon="@mipmap/usermenu">
+        <menu>
+            <item
+                android:id="@+id/itemsub1"
+                android:title="Contraseña"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/itemsub2"
+                android:title="N Medidor"
+                app:showAsAction="never" />
+            <item
+                android:id="@+id/itemsub"
+                android:title=""
+                app:showAsAction="never" />
+        </menu>
+    </item>
+
+</menu>

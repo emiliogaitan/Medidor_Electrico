@@ -20,6 +20,8 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.medidor_electrico.vista_temporales.dialog_vista;
+import com.example.medidor_electrico.vista_temporales.numero_medidor;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -29,7 +31,7 @@ import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
-public class configure_user_datos extends AppCompatActivity {
+public class configure_user_datos extends AppCompatActivity implements numero_medidor.configure_user_datos {
     RequestQueue requestQueue;
     String medidor;
 
@@ -62,28 +64,35 @@ public class configure_user_datos extends AppCompatActivity {
         }else{
             medidor=(String)savedInstanceState.getSerializable("medidor");
         }
-        datos_totales("http://www.orthodentalnic.com/arduino/todo_generales.php");
+        datos_totales("https://www.orthodentalnic.com/arduino/todo_generales.php");
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_regresar, menu);
+        inflater.inflate(R.menu.menu_datos, menu);
         return true;
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.itemregresar:
+            case R.id.itemsub1:
                 Intent intent3 = new Intent(this, consumo.class);
                 startActivity(intent3);
+                return true;
+            case R.id.itemsub2:
+                numero_medidor dialog=new numero_medidor();
+                dialog.show(getSupportFragmentManager(), "ejemplo2");
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
+    @Override
+    public void applyTexts2(String numeromedidor) {
 
+    }
     public void enviardatos(View view) {
         valor1 = nombre.getText().toString();
         valor2 = telefono.getText().toString();
@@ -166,5 +175,6 @@ public class configure_user_datos extends AppCompatActivity {
         requestQueue =Volley.newRequestQueue(this);
         requestQueue.add(jsonArrayRequest);
     }
+
 
 }

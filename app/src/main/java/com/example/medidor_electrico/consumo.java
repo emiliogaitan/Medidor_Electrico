@@ -4,6 +4,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -21,19 +22,11 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.medidor_electrico.app_txt_BD.dialog_vista;
-import com.github.mikephil.charting.charts.BarChart;
-import com.github.mikephil.charting.charts.HorizontalBarChart;
+import com.example.medidor_electrico.vista_temporales.dialog_vista;
+import com.github.lzyzsd.circleprogress.ArcProgress;
 import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.components.Description;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.BarData;
-import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.github.mikephil.charting.interfaces.datasets.IBarDataSet;
-import com.github.mikephil.charting.utils.ColorTemplate;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -62,53 +55,31 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
     public static double tarifas;
     RequestQueue requestQueue;
 
-    private BarChart mBarChart;
+    ArcProgress arcProgress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_consumo);
+
         setFechaActual();
 
         // server acceso
-        datos_totales("https://www.orthodentalnic.com/arduino/limte_mostar.php");
-        ejecutarServices("https://www.orthodentalnic.com/arduino/potencia.php");
-        datos_tarifa("https://www.orthodentalnic.com/arduino/limte_mostar.php");
-
-        HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.grafica1);
-        BarDataSet set1;
-        set1 = new BarDataSet(getDataSet(), "Año 2019");
-
-        set1.setColors(ColorTemplate.MATERIAL_COLORS);
-
-        ArrayList<IBarDataSet> dataSets = new ArrayList<IBarDataSet>();
-        dataSets.add(set1);
-
-        BarData data = new BarData(dataSets);
-
-        // hide Y-axis
-        YAxis left = chart.getAxisLeft();
-        left.setDrawLabels(false);
-
-        // custom X-axis labels
-        String[] values = new String[]{"Marzo", "Mayo", "Junio", "Julio", "Agosto", "Septiembre"};
-        XAxis xAxis = chart.getXAxis();
-        xAxis.setValueFormatter(new grafica_consumo.MyXAxisValueFormatter(values));
-
-        chart.setData(data);
-
-        // custom description
-        Description description = new Description();
-        description.setText("Consumo total Kwh mensula");
-        chart.setDescription(description);
-
-        // hide legend
-        chart.getLegend().setEnabled(false);
-        chart.animateY(1000);
-        chart.invalidate();
-
+        peticiones_https();
+        //aser acceso en vivo
+        arcProgress = findViewById(R.id.arc_progress);
+        arcProgress.setMax(10);
+        arcProgress.setProgress(0);
+        arcProgress.setSuffixText("KWH");
 
         notificacion();
+//hilo de notificacion de respuesta de arduino mini
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                timepeticiones("https://www.orthodentalnic.com/arduino/realtime.php");
+            }
+        }, 8000);
     }
 
     public void setFechaActual() {
@@ -134,13 +105,19 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         return true;
     }
 
+    public void peticiones_https() {
+        // server acceso
+        datos_totales("https://www.orthodentalnic.com/arduino/limte_mostar.php");
+        ejecutarServices("https://www.orthodentalnic.com/arduino/potencia.php");
+        datos_tarifa("https://www.orthodentalnic.com/arduino/limte_mostar.php");
+    }
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.refresh:
-                datos_totales("https://www.orthodentalnic.com/arduino/limte_mostar.php");
-                ejecutarServices("https://www.orthodentalnic.com/arduino/potencia.php");
-                datos_tarifa("https://www.orthodentalnic.com/arduino/limte_mostar.php");
+                peticiones_https();
                 return true;
             case R.id.itemsub1:
                 dialog_vista dialog_vista = new dialog_vista();
@@ -351,6 +328,29 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         requestQueue.add(stringRequest);
     }
 
+    private void timepeticiones(String url) {
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                arcProgress.setProgress(0);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getApplicationContext(), "No WIFI", Toast.LENGTH_SHORT).show();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String, String> parametross = new HashMap<String, String>();
+                parametross.put("tarifa", "prueba");
+                return parametross;
+            }
+        };
+        requestQueue = Volley.newRequestQueue(this);
+        requestQueue.add(stringRequest);
+    }
+
     public void notificacion() {
 
         // notificacon de mostracion de la imagenes de lsp datos
@@ -365,13 +365,14 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
             notificacion.setContentTitle("Ahorro");
             notificacion.setContentText("Limite de consumo al Maximo");
 
-            Intent intent = new Intent(consumo.this, grafica_consumo.class);
-            PendingIntent pendingIntent = PendingIntent.getActivities(consumo.this, 0, new Intent[]{intent}, PendingIntent.FLAG_UPDATE_CURRENT);
+            Intent intent = new Intent(this, grafica_consumo.class);
+            PendingIntent pendingIntent = PendingIntent.getActivities(this, 0, new Intent[]{intent}, PendingIntent.FLAG_UPDATE_CURRENT);
             notificacion.setContentIntent(pendingIntent);
 
             NotificationManager nm = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
             nm.notify(idUnica, notificacion.build());
         }
+
     }
 
     private void datos_totales(String url) {
