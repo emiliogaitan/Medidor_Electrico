@@ -48,9 +48,9 @@ public class intronext extends AppCompatActivity {
                 if (todo.equals("")) {
 
                 } else {
+                    finish();
                     Intent intent = new Intent(this, consumo.class);
                     startActivity(intent);
-                    finish();
                 }
             } catch (IOException e) {
 
@@ -87,19 +87,19 @@ public class intronext extends AppCompatActivity {
         if(contador==0){
 
         }else if(contador==1){
-            uno.setImageResource(R.mipmap.banner2);
+            uno.setImageResource(R.mipmap.next2);
             dos.setText("Conectado a Internet");
             tres.setText("Consulta desde cualquier sitio toda la información " +
-                    "de tu consumo eléctrico. Mirubee vigila que todo vaya bien.");
+                    "de tu consumo eléctrico. Medidor Electrico vigila que todo vaya bien.");
         }else if(contador==2){
-            uno.setImageResource(R.mipmap.banner4);
+            uno.setImageResource(R.mipmap.next3);
             dos.setText("Actúa y ahorra");
             tres.setText("Descubre oportunidades de ahorro reales y optimiza el uso" +
                     " de electricidad en tu casa. Elige la tarifa eléctrica más adecuada a tu perfil.");
         }else{
             grabar("si");
+            intronext.this.finish();
             Intent intent = new Intent(this, consumo.class);
-            finish();
             startActivity(intent);
         }
     }

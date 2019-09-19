@@ -75,6 +75,7 @@
         android:layout_marginLeft="8dp"
         android:layout_marginTop="28dp"
         android:layout_marginEnd="16dp"
+        android:onClick="Cierre"
         android:layout_marginRight="16dp"
         android:background="@drawable/ic_date"
         app:layout_constraintEnd_toEndOf="parent"
@@ -138,6 +139,7 @@
         android:layout_marginLeft="120dp"
         android:layout_marginTop="28dp"
         android:text="00/00/0000"
+        android:onClick="Cierre"
         android:textColor="@color/colorPrimary"
         app:layout_constraintStart_toEndOf="@+id/textView9"
         app:layout_constraintTop_toTopOf="parent" />
@@ -151,7 +153,7 @@
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginRight="8dp"
-        android:text="consumo en Vivo:"
+        android:text="consumo Kw/h anual:"
         android:textColor="@color/azul"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
@@ -180,17 +182,28 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView9" />
 
-    <com.github.lzyzsd.circleprogress.ArcProgress
-        android:id="@+id/arc_progress"
-        android:layout_width="185dp"
-        android:layout_height="180dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginRight="8dp"
-        android:background="@color/white"
-        app:arc_bottom_text="Arduino Conectado"
-        app:arc_finished_color="@color/orange"
-        app:arc_stroke_width="15dp"
-        app:arc_progress="5"
+    <ImageView
+        android:id="@+id/imageView9"
+        android:layout_width="29dp"
+        android:layout_height="33dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toBottomOf="@+id/KWH"
+        app:layout_constraintStart_toStartOf="@+id/KWH"
+        app:layout_constraintTop_toTopOf="@+id/KWH"
+        app:layout_constraintVertical_bias="0.0"
+        app:srcCompat="@mipmap/trasnmiciondatos" />
+
+    <WebView
+        android:id="@+id/graficaweb1"
+        android:layout_width="371dp"
+        android:layout_height="194dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="14dp"
+        android:layout_marginRight="14dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textView16" />

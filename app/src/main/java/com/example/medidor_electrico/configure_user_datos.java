@@ -1,7 +1,6 @@
 package com.example.medidor_electrico;
 
 import android.content.Intent;
-import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -17,17 +16,14 @@ import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.example.medidor_electrico.vista_temporales.dialog_vista;
 import com.example.medidor_electrico.vista_temporales.numero_medidor;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URL;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -49,7 +45,7 @@ public class configure_user_datos extends AppCompatActivity implements numero_me
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_configure_user_datos);
-        nombre = findViewById(R.id.Editext202);
+        nombre = findViewById(R.id.pass2);
         telefono = findViewById(R.id.Editext203);
         departamento= findViewById(R.id.Editext204);
         direccion = findViewById(R.id.Editext205);
@@ -77,13 +73,21 @@ public class configure_user_datos extends AppCompatActivity implements numero_me
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            case R.id.itemsub1:
+            case R.id.regresar:
                 Intent intent3 = new Intent(this, consumo.class);
                 startActivity(intent3);
+                return true;
+            case R.id.itemsub1:
+                Intent intent5 = new Intent(this, contrasena.class);
+                startActivity(intent5);
                 return true;
             case R.id.itemsub2:
                 numero_medidor dialog=new numero_medidor();
                 dialog.show(getSupportFragmentManager(), "ejemplo2");
+                return true;
+            case R.id.itemsub3:
+                Intent intent4 = new Intent(this, version.class);
+                startActivity(intent4);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

@@ -2,7 +2,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
-        android:id="@+id/refresh"
+        android:id="@+id/regresar"
         android:title="regresar"
         app:showAsAction="ifRoom"
         android:icon="@drawable/ic_regresar"/>
@@ -14,15 +14,18 @@
             <item
                 android:id="@+id/itemsub1"
                 android:title="Contraseña"
-                app:showAsAction="never" />
+                android:icon="@mipmap/passwordapp"
+                app:showAsAction="ifRoom|withText" />
             <item
                 android:id="@+id/itemsub2"
                 android:title="N Medidor"
-                app:showAsAction="never" />
+                android:icon="@mipmap/potenciaz"
+                app:showAsAction="ifRoom|withText" />
             <item
-                android:id="@+id/itemsub"
-                android:title=""
-                app:showAsAction="never" />
+                android:id="@+id/itemsub3"
+                android:title="Info"
+                android:icon="@mipmap/infoapp"
+                app:showAsAction="ifRoom|withText" />
         </menu>
     </item>
 

@@ -7,15 +7,20 @@
     <uses-permission android:name="android.permission.ACCESS_NOTIFICATION_POLICY" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.VIBRATE" />
+    <uses-permission android:name="android.permission.CAMERA" />
 
     <application
         android:allowBackup="true"
         android:icon="@mipmap/potencia"
         android:label="@string/app_name"
+        android:launchMode="singleInstance"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat">
-        <activity android:name=".categoria_electrodomestico"></activity>
+        <activity android:name=".scanner" />
+        <activity android:name=".contrasena" />
+        <activity android:name=".version" />
+        <activity android:name=".categoria_electrodomestico" />
         <activity android:name=".consumo" />
         <activity android:name=".intronext" />
         <activity android:name=".restablecer_user" />

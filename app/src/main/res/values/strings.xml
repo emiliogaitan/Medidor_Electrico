@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">Tesla Electric</string>
+    <string name="app_name">Medidor Electrico</string>
+    <string name="yes">OK</string>
+    <string name="no">Cancelar</string>
 </resources>

@@ -10,8 +10,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.Volley;
 import com.example.medidor_electrico.R;
 import com.example.medidor_electrico.configure_user_datos;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class numero_medidor extends AppCompatDialogFragment {
     private EditText numero;
@@ -35,7 +44,8 @@ public class numero_medidor extends AppCompatDialogFragment {
                         listener.applyTexts2(numeromedidor);
                     }
                 });
-       numero = view.findViewById(R.id.textmedidor);
+        datos_tarifa("https://www.orthodentalnic.com/arduino/limte_mostar.php");
+        numero = view.findViewById(R.id.textmedidor);
         return builder.create();
     }
     @Override
@@ -49,5 +59,29 @@ public class numero_medidor extends AppCompatDialogFragment {
     }
     public interface configure_user_datos {
         void applyTexts2(String numeromedidor);
+    }
+    private void datos_tarifa(String url) {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(url, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                JSONObject jsonObject = null;
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        jsonObject = response.getJSONObject(i);
+                        String d= jsonObject.getString("tarifa");
+                        numero.setText(d);
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+
+            }
+        });
+        RequestQueue requestQueue = (RequestQueue) Volley.newRequestQueue(getActivity());
+        requestQueue.add(jsonArrayRequest);
     }
 }

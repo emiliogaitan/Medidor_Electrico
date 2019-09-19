@@ -23,6 +23,7 @@ import java.io.OutputStreamWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+
 public class MainActivity extends AppCompatActivity {
     public static String var_user;
     public static String var_pass;
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 if (todo.equals("")) {
 
                 } else {
+                    MainActivity.this.finish();
                     Intent intent = new Intent(MainActivity.this, intronext.class);
                     startActivity(intent);
                 }
@@ -112,6 +114,7 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "Usuario y Contraseña? No valido", Toast.LENGTH_SHORT).show();
                 } else {
                     grabar(response);
+                    finish();
                     Intent intent = new Intent(MainActivity.this, intronext.class);
                     startActivity(intent);
                 }
@@ -120,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Toast.makeText(getApplicationContext(), "Error Conexion", Toast.LENGTH_SHORT).show();
+                finish();
                 Intent intent = new Intent(MainActivity.this, intronext.class);
                 startActivity(intent);
             }
@@ -138,7 +142,15 @@ public class MainActivity extends AppCompatActivity {
 
 
     public void btnrestablecerOnclik(View view) {
+        MainActivity.this.finish();
         Intent intent = new Intent(this, restablecer_user.class);
         startActivity(intent);
     }
+
+    public void scanner(View view) {
+        MainActivity.this.finish();
+        Intent intent = new Intent(this, scanner.class);
+        startActivity(intent);
+    }
+
 }

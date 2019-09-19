@@ -15,23 +15,28 @@
             <item
                 android:id="@+id/itemsub1"
                 android:title="Tarifa"
-                app:showAsAction="never" />
+                android:icon="@mipmap/tarifa"
+                app:showAsAction="ifRoom|withText" />
             <item
                 android:id="@+id/itemsub4"
                 android:title="Consumo"
-                app:showAsAction="never" />
+                android:icon="@mipmap/graficas"
+                app:showAsAction="ifRoom|withText" />
             <item
                 android:id="@+id/itemsub6"
                 android:title="Ahorro"
-                app:showAsAction="never" />
+                android:icon="@mipmap/ahorrodinner"
+                app:showAsAction="ifRoom|withText" />
             <item
                 android:id="@+id/itemsub2"
-                android:title="Datos personales"
-                app:showAsAction="never" />
+                android:title="Cuenta"
+                android:icon="@mipmap/user2"
+                app:showAsAction="ifRoom|withText" />
             <item
                 android:id="@+id/itemsub3"
                 android:title="Cerrar Sesión"
-                app:showAsAction="never" />
+                android:icon="@mipmap/exit"
+                app:showAsAction="ifRoom|withText" />
         </menu>
     </item>
 

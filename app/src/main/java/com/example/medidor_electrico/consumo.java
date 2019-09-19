@@ -1,5 +1,7 @@
 package com.example.medidor_electrico;
 
+import android.app.AlertDialog;
+import android.app.DatePickerDialog;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -8,9 +10,14 @@ import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.webkit.WebView;
+import android.widget.DatePicker;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,10 +30,6 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 import com.example.medidor_electrico.vista_temporales.dialog_vista;
-import com.github.lzyzsd.circleprogress.ArcProgress;
-import com.github.mikephil.charting.components.AxisBase;
-import com.github.mikephil.charting.data.BarEntry;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,12 +41,12 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.text.Format;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
 public class consumo extends AppCompatActivity implements dialog_vista.consumo {
+
     TextView fecha;
     String fecha_valor;
     String indmedidor;
@@ -55,7 +58,10 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
     public static double tarifas;
     RequestQueue requestQueue;
 
-    ArcProgress arcProgress;
+    WebView grafica1;
+
+//fechas
+    int dia,mes,ano;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,31 +69,20 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         setContentView(R.layout.activity_consumo);
 
         setFechaActual();
-
-        // server acceso
         peticiones_https();
-        //aser acceso en vivo
-        arcProgress = findViewById(R.id.arc_progress);
-        arcProgress.setMax(10);
-        arcProgress.setProgress(0);
-        arcProgress.setSuffixText("KWH");
 
-        notificacion();
-//hilo de notificacion de respuesta de arduino mini
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                timepeticiones("https://www.orthodentalnic.com/arduino/realtime.php");
-            }
-        }, 8000);
+        grafica1 = findViewById(R.id.graficaweb1);
+        grafica1.loadUrl("eeeee.com");
+
+
     }
 
     public void setFechaActual() {
         fecha = findViewById(R.id.textfecha);
         final Calendar c = Calendar.getInstance();
-        int año = c.get(Calendar.YEAR);
-        int mes = c.get(Calendar.MONTH);
-        int dia = c.get(Calendar.DAY_OF_MONTH);
+        ano = c.get(Calendar.YEAR);
+        mes = c.get(Calendar.MONTH);
+        dia = c.get(Calendar.DAY_OF_MONTH);
         Format formatter = new SimpleDateFormat("dd/MM/yyyy");
         String s = formatter.format(c.getTime());
 
@@ -124,27 +119,27 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
                 dialog_vista.show(getSupportFragmentManager(), "ejemplo1");
                 return true;
             case R.id.itemsub2:
+                consumo.this.finish();
                 Intent intent4 = new Intent(consumo.this, configure_user_datos.class);
                 intent4.putExtra("medidor", indmedidor);
                 startActivity(intent4);
-                finish();
                 return true;
             case R.id.itemsub4:
+                consumo.this.finish();
                 Intent intent5 = new Intent(consumo.this, grafica_consumo.class);
                 startActivity(intent5);
-                finish();
                 return true;
             case R.id.itemsub3:
+                consumo.this.finish();
                 Intent intent6 = new Intent(consumo.this, MainActivity.class);
                 startActivity(intent6);
                 cerra_app("");
                 cerra_app2("");
-                finish();
                 return true;
             case R.id.itemsub6:
+                consumo.this.finish();
                 Intent intent7 = new Intent(consumo.this, categoria_electrodomestico.class);
                 startActivity(intent7);
-                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -178,9 +173,11 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
     public void applyTexts(String tarifa) {
         guardar_tarifa("https://www.orthodentalnic.com/arduino/tarifa_insertar.php");
         tarifas = Double.parseDouble(tarifa);
+        finish();
         Intent intent5 = new Intent(consumo.this, consumo.class);
         startActivity(intent5);
     }
+
 
     private void ejecutarServices(String url) {
         StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
@@ -195,6 +192,17 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
                 float respuesta = (float) (val * tarifas);
                 potencia = (int) respuesta;
                 total.setText(String.valueOf(respuesta) + " Cordobas");
+
+
+                //hilo de notificacion de respuesta de arduino mini
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        notificacion();
+                    }
+                }, 9000);
+
+
             }
         }, new Response.ErrorListener() {
             @Override
@@ -231,6 +239,7 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
                 br.close();
                 archivo.close();
                 if (todo.equals("")) {
+                    finish();
                     Intent intent = new Intent(this, MainActivity.class);
                     startActivity(intent);
                 }
@@ -250,36 +259,6 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         return false;
     }
 
-
-    public class MyXAxisValueFormatter implements IAxisValueFormatter {
-
-        private String[] mValues;
-
-        public MyXAxisValueFormatter(String[] values) {
-            this.mValues = values;
-        }
-
-        @Override
-        public String getFormattedValue(float value, AxisBase axis) {
-            return mValues[(int) value];
-        }
-    }
-
-    private ArrayList<BarEntry> getDataSet() {
-        ArrayList<BarEntry> valueSet1 = new ArrayList<>();
-        BarEntry v1e2 = new BarEntry(1, 95f);
-        valueSet1.add(v1e2);
-        BarEntry v1e3 = new BarEntry(2, 98f);
-        valueSet1.add(v1e3);
-        BarEntry v1e4 = new BarEntry(3, 100f);
-        valueSet1.add(v1e4);
-        BarEntry v1e5 = new BarEntry(4, 95f);
-        valueSet1.add(v1e5);
-        BarEntry v1e6 = new BarEntry(5, 0f);
-        valueSet1.add(v1e6);
-        return valueSet1;
-    }
-
     private void datos_tarifa(String url) {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(url, new Response.Listener<JSONArray>() {
             @Override
@@ -287,6 +266,7 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
                 JSONObject jsonObject = null;
                 for (int i = 0; i < response.length(); i++) {
                     try {
+
                         jsonObject = response.getJSONObject(i);
                         tarifas = Double.parseDouble(jsonObject.getString("tarifa"));
                     } catch (JSONException e) {
@@ -297,7 +277,8 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+
+                Toast.makeText(getApplicationContext(), "Error Conexion", Toast.LENGTH_SHORT).show();
             }
         });
         requestQueue = Volley.newRequestQueue(this);
@@ -313,7 +294,8 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), "Error Conexion", Toast.LENGTH_SHORT).show();
+
+//                Toast.makeText(getApplicationContext(), "Error Conexion", Toast.LENGTH_SHORT).show();
             }
         }) {
             @Override
@@ -328,36 +310,15 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         requestQueue.add(stringRequest);
     }
 
-    private void timepeticiones(String url) {
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
-            @Override
-            public void onResponse(String response) {
-                arcProgress.setProgress(0);
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), "No WIFI", Toast.LENGTH_SHORT).show();
-            }
-        }) {
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                Map<String, String> parametross = new HashMap<String, String>();
-                parametross.put("tarifa", "prueba");
-                return parametross;
-            }
-        };
-        requestQueue = Volley.newRequestQueue(this);
-        requestQueue.add(stringRequest);
-    }
 
     public void notificacion() {
 
         // notificacon de mostracion de la imagenes de lsp datos
         notificacion = new NotificationCompat.Builder(this);
         notificacion.setAutoCancel(true);
+        int calculo=potencia*5;
 
-        if ((potencia * 5) > limite) {
+        if (calculo >= limite) {
             notificacion.setSmallIcon(R.mipmap.bombilla);
             notificacion.setTicker("Limite de consumo");
             notificacion.setPriority(Notification.PRIORITY_HIGH);
@@ -392,10 +353,24 @@ public class consumo extends AppCompatActivity implements dialog_vista.consumo {
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(getApplicationContext(), "Error de conexión", Toast.LENGTH_SHORT).show();
+
+//                Toast.makeText(getApplicationContext(), "Error Conexion", Toast.LENGTH_SHORT).show();
             }
         });
         requestQueue = Volley.newRequestQueue(this);
         requestQueue.add(jsonArrayRequest);
+    }
+
+    public void Cierre(final View view) {
+        DatePickerDialog datePickerDialog;
+        datePickerDialog = new DatePickerDialog(consumo.this, new DatePickerDialog.OnDateSetListener() {
+            @Override
+            public void onDateSet(DatePicker view, int year, int month, int dayOfMonth) {
+                fecha = findViewById(R.id.textfecha);
+                fecha.setText(dayOfMonth + "/" + month +"/"+year);
+                fecha_valor=year+ "/" + month +"/"+dayOfMonth;
+            }
+        }, ano, mes, dia);
+        datePickerDialog.show();
     }
 }

@@ -4,8 +4,8 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Intent;
+import android.os.Handler;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -24,6 +24,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.medidor_electrico.vista_temporales.fechacierre;
 import com.github.mikephil.charting.charts.HorizontalBarChart;
 import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.Description;
@@ -40,10 +41,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -56,7 +53,7 @@ public class grafica_consumo extends AppCompatActivity {
     RequestQueue requestQueue;
     NotificationCompat.Builder notificacion;
     private static final int idUnica = 006;
-    private static int potencia = 0;
+    private static int potencia;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,7 +62,15 @@ public class grafica_consumo extends AppCompatActivity {
 
         datos_totales("https://www.orthodentalnic.com/arduino/limte_mostar.php");
         ejecutarServicespotemciz("https://www.orthodentalnic.com/arduino/potencia.php");
-        notificacion();
+
+
+        //hilo de notificacion de respuesta de arduino mini
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                notificacion();
+            }
+        }, 9000);
 
         mostrarPorcentaje = (TextView) findViewById(R.id.txtCargar);
         // SeekBar
@@ -94,7 +99,7 @@ public class grafica_consumo extends AppCompatActivity {
                     }
                 });
 
-        HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.grafica1);
+        HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.graficaweb1);
         BarDataSet set1;
         set1 = new BarDataSet(getDataSet(), "Año 2019");
 
@@ -179,7 +184,7 @@ public class grafica_consumo extends AppCompatActivity {
 
     public void nn1(View view) {
 
-        HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.grafica1);
+        HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.graficaweb1);
         BarDataSet set1;
         set1 = new BarDataSet(getDataSetDias(), "Año 2019");
 
@@ -215,7 +220,7 @@ public class grafica_consumo extends AppCompatActivity {
 
     public void nn2(View view) {
 
-        HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.grafica1);
+        HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.graficaweb1);
         BarDataSet set1;
         set1 = new BarDataSet(getDataSetSemana(), "Año 2019");
 
@@ -249,7 +254,7 @@ public class grafica_consumo extends AppCompatActivity {
     }
 
     public void nn3(View view) {
-        HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.grafica1);
+        HorizontalBarChart chart = (HorizontalBarChart) findViewById(R.id.graficaweb1);
         BarDataSet set1;
         set1 = new BarDataSet(getDataSet(), "Año 2019");
 
@@ -366,8 +371,8 @@ public class grafica_consumo extends AppCompatActivity {
         // notificacon de mostracion de la imagenes de lsp datos
         notificacion = new NotificationCompat.Builder(this);
         notificacion.setAutoCancel(true);
-
-        if ((potencia * 5) > limite) {
+        int valor=potencia*5;
+        if (valor >= limite) {
             notificacion.setSmallIcon(R.mipmap.bombilla);
             notificacion.setTicker("Limite de consumo");
             notificacion.setPriority(Notification.PRIORITY_HIGH);
